@@ -117,5 +117,34 @@ function createKeyboard(lang) {
   createFifthRow();
 }
 
-
 createKeyboard('eng');
+
+const keys = document.querySelectorAll('.key');
+
+function addDataValue() {
+  for (let i = 0; i < keys.length; i += 1) {
+    keys[i].dataset.value = keyCodes[i];
+  }
+}
+addDataValue();
+
+// add highlight on active keys
+
+document.addEventListener('keydown', (event) => {
+  keys.forEach((key) => {
+    if (event.metaKey) {
+      document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
+    }
+    if (key.dataset.value === event.code) {
+      key.classList.add('key_active');
+    }
+  });
+});
+
+// remove highlight after key up
+
+document.addEventListener('keyup', () => {
+  keys.forEach((key) => {
+    key.classList.remove('key_active');
+  });
+});
