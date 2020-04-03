@@ -14,6 +14,10 @@ container.append(textarea);
 const keyboard = createElem('div', 'keyboard');
 container.append(keyboard);
 
+const note = createElem('p', 'note');
+note.innerHTML = 'To change language press Shift + Alt (для смены языка нажмите Shift + Alt)';
+container.append(note);
+
 // create html for buttons
 
 const firstRowEng = ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
@@ -117,9 +121,14 @@ function createKeyboard(lang) {
   createFifthRow();
 }
 
-createKeyboard('eng');
+// generate english keyboard by default if open site at first
+// or take language value from sessionStorage if language was switched
 
-const keys = document.querySelectorAll('.key');
+let lang;
+lang = sessionStorage.getItem('language') || 'eng';
+createKeyboard(lang);
+
+let keys = document.querySelectorAll('.key');
 
 function addDataValue() {
   for (let i = 0; i < keys.length; i += 1) {
@@ -127,6 +136,27 @@ function addDataValue() {
   }
 }
 addDataValue();
+
+let shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+let altLeft = document.querySelector('.key[data-value=AltLeft]');
+
+function changeLanguage() {
+  if (lang === 'eng') {
+    lang = 'ru';
+  } else {
+    lang = 'eng';
+  }
+  sessionStorage.setItem('language', lang);
+  // generate new keyboard with switched language
+  keyboard.innerHTML = '';
+  createKeyboard(lang);
+  // reassign querySelectors for new keyboard
+  // (after change language eventListeners doesn't work without this)
+  keys = document.querySelectorAll('.key');
+  addDataValue();
+  shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+  altLeft = document.querySelector('.key[data-value=AltLeft]');
+}
 
 // add highlight on active keys
 
@@ -137,6 +167,9 @@ document.addEventListener('keydown', (event) => {
     }
     if (key.dataset.value === event.code) {
       key.classList.add('key_active');
+    }
+    if (shiftLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
+      changeLanguage();
     }
   });
 });

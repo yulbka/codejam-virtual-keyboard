@@ -65,3 +65,10 @@ body {
 .key_active {
   background-color: aquamarine;
 }
+
+.note {
+  width: 450px;  
+  font-family: 'Roboto', sans-serif;
+  font-size: 2.5rem; 
+  color: #121212;
+}
