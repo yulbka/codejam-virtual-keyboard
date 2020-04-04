@@ -221,3 +221,31 @@ document.addEventListener('keyup', (event) => {
     key.classList.remove('key_active');
   });
 });
+
+// use keyboard on mouse-click
+
+keyboard.addEventListener('click', (event) => {
+  const target = event.target.closest('.key');
+  if (!target) return;
+  if (target.innerHTML === 'CapsLock') {
+    capsToggle();
+    if (caps) { target.classList.add('key_active'); }
+    if (!caps) { target.classList.remove('key_active'); }
+  }
+  if (target.innerHTML === 'Tab') { useTab(); }
+  if (target.innerHTML.length < 2) {
+    textarea.setRangeText(target.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+  }
+});
+
+keyboard.addEventListener('mousedown', (event) => {
+  keys.forEach(() => {
+    event.target.closest('.key').classList.add('key_active');
+  });
+});
+
+keyboard.addEventListener('mouseup', (event) => {
+  keys.forEach(() => {
+    event.target.closest('.key').classList.remove('key_active');
+  });
+});
