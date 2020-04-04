@@ -15,7 +15,7 @@ const keyboard = createElem('div', 'keyboard');
 container.append(keyboard);
 
 const note = createElem('p', 'note');
-note.innerHTML = 'To change language press Shift + Alt (для смены языка нажмите Shift + Alt)';
+note.innerHTML = 'To change language press left Ctrl + Alt\nCreated on Windows OS';
 container.append(note);
 
 // create html for buttons
@@ -31,7 +31,6 @@ const thirdRowRu = ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 
 const fourthRowRu = ['я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '/'];
 const fourthRowEng = ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'];
 const keyCodes = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace', 'Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete', 'CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter', 'ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ControlRight'];
-const keyCodesSwitched = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backslash'];
 
 function createSimpleKey(value) {
   const key = createElem('button', 'key');
@@ -138,14 +137,16 @@ function addDataValue() {
 }
 addDataValue();
 
-let shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+let ctrlLeft = document.querySelector('.key[data-value=ControlLeft]');
 let altLeft = document.querySelector('.key[data-value=AltLeft]');
+let shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+let shiftRight = document.querySelector('.key[data-value=ShiftRight]');
 
 let caps = false;
 
 function capsOn() {
   keys.forEach((key) => {
-    if (key.dataset.value.length === 4) {
+    if (key.innerHTML.length === 1) {
       key.innerHTML = key.innerHTML.toUpperCase();
     }
   });
@@ -153,7 +154,7 @@ function capsOn() {
 
 function capsOff() {
   keys.forEach((key) => {
-    if (key.dataset.value.length === 4) {
+    if (key.innerHTML.length === 1) {
       key.innerHTML = key.innerHTML.toLowerCase();
     }
   });
@@ -163,10 +164,11 @@ function capsToggle() {
   if (!caps) { capsOn(); }
   if (caps) { capsOff(); }
   caps = !caps;
+  sessionStorage.setItem('capsLk', caps);
 }
 
 function useTab() {
-  textarea.setRangeText('    ', textarea.selectionStart, textarea.selectionEnd, 'end');
+  textarea.setRangeText('\t', textarea.selectionStart, textarea.selectionEnd, 'end');
 }
 
 function changeLanguage() {
@@ -184,14 +186,14 @@ function changeLanguage() {
   keys = document.querySelectorAll('.key');
   addDataValue();
   caps = false;
-  shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+  ctrlLeft = document.querySelector('.key[data-value=ControlLeft]');
   altLeft = document.querySelector('.key[data-value=AltLeft]');
+  shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
+  shiftRight = document.querySelector('.key[data-value=ShiftRight]');
 }
 
-// add highlight on active keys
-
+// add event on key press (print values, switch letters case, change language)
 document.addEventListener('keydown', (event) => {
-  console.log(event.repeat);
   if (event.code === 'Tab') {
     event.preventDefault();
     useTab();
@@ -201,20 +203,37 @@ document.addEventListener('keydown', (event) => {
     document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_active');
   }
   if (event.key === 'Shift') { capsToggle(); }
+  keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
+    // add highlight on active meta key
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
     }
     if (key.dataset.value === 'CapsLock') return;
     if (key.dataset.value === event.code) {
+      // add highlight on active keys
       key.classList.add('key_active');
+      // make focus on textarea and print symbols when key down
       if (key.innerHTML.length < 2) {
-        event.preventDefault();
-        textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+        textarea.focus();
+        // print second value on switched keys when Shift active
+        if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
+          if (key.dataset.content) {
+            event.preventDefault();
+            textarea.setRangeText(key.dataset.content, textarea.selectionStart, textarea.selectionEnd, 'end');
+          } else {
+            event.preventDefault();
+            textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+          }
+        // print main value that displayed on simple and switched keys
+        } else {
+          event.preventDefault();
+          textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+        }
       }
-    }
-    if (shiftLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
-      changeLanguage();
+      if (ctrlLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
+        changeLanguage();
+      }
     }
   });
 });
@@ -245,6 +264,7 @@ keyboard.addEventListener('click', (event) => {
   }
   if (target.innerHTML === 'Tab') { useTab(); }
   if (target.innerHTML.length < 2) {
+    event.preventDefault();
     textarea.setRangeText(target.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
   }
 });
