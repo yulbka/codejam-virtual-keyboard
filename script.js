@@ -164,6 +164,10 @@ function capsToggle() {
   caps = !caps;
 }
 
+function useTab() {
+  textarea.setRangeText('    ', textarea.selectionStart, textarea.selectionEnd, 'end');
+}
+
 function changeLanguage() {
   if (lang === 'eng') {
     lang = 'ru';
@@ -186,6 +190,10 @@ function changeLanguage() {
 // add highlight on active keys
 
 document.addEventListener('keydown', (event) => {
+  if (event.code === 'Tab') {
+    event.preventDefault();
+    useTab();
+  }
   if (event.code === 'CapsLock') { capsToggle(); }
   if (event.key === 'Shift') { capsOn(); }
   keys.forEach((key) => {
