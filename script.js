@@ -140,6 +140,30 @@ addDataValue();
 let shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
 let altLeft = document.querySelector('.key[data-value=AltLeft]');
 
+let caps = false;
+
+function capsOn() {
+  keys.forEach((key) => {
+    if (key.dataset.value.length === 4) {
+      key.innerHTML = key.innerHTML.toUpperCase();
+    }
+  });
+}
+
+function capsOff() {
+  keys.forEach((key) => {
+    if (key.dataset.value.length === 4) {
+      key.innerHTML = key.innerHTML.toLowerCase();
+    }
+  });
+}
+
+function capsToggle() {
+  if (!caps) capsOn();
+  if (caps) capsOff();
+  caps = !caps;
+}
+
 function changeLanguage() {
   if (lang === 'eng') {
     lang = 'ru';
@@ -153,7 +177,8 @@ function changeLanguage() {
   // reassign querySelectors for new keyboard
   // (after change language eventListeners doesn't work without this)
   keys = document.querySelectorAll('.key');
-  addDataValue();
+  addDataValue();  
+  caps = false;
   shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
   altLeft = document.querySelector('.key[data-value=AltLeft]');
 }
@@ -161,10 +186,12 @@ function changeLanguage() {
 // add highlight on active keys
 
 document.addEventListener('keydown', (event) => {
+  if (event.code === 'CapsLock') { capsToggle(); }
+  if (event.key === 'Shift') { capsOn(); }
   keys.forEach((key) => {
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
-    }
+    }    
     if (key.dataset.value === event.code) {
       key.classList.add('key_active');
     }
@@ -177,6 +204,7 @@ document.addEventListener('keydown', (event) => {
 // remove highlight after key up
 
 document.addEventListener('keyup', () => {
+  if (event.key === 'Shift') { capsOff(); }
   keys.forEach((key) => {
     key.classList.remove('key_active');
   });
