@@ -177,7 +177,7 @@ function changeLanguage() {
   // reassign querySelectors for new keyboard
   // (after change language eventListeners doesn't work without this)
   keys = document.querySelectorAll('.key');
-  addDataValue();  
+  addDataValue();
   caps = false;
   shiftLeft = document.querySelector('.key[data-value=ShiftLeft]');
   altLeft = document.querySelector('.key[data-value=AltLeft]');
@@ -191,9 +191,13 @@ document.addEventListener('keydown', (event) => {
   keys.forEach((key) => {
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
-    }    
+    }
     if (key.dataset.value === event.code) {
       key.classList.add('key_active');
+      if (key.innerHTML.length < 2) {
+        event.preventDefault();
+        textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+      }
     }
     if (shiftLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
       changeLanguage();
@@ -203,7 +207,7 @@ document.addEventListener('keydown', (event) => {
 
 // remove highlight after key up
 
-document.addEventListener('keyup', () => {
+document.addEventListener('keyup', (event) => {
   if (event.key === 'Shift') { capsOff(); }
   keys.forEach((key) => {
     key.classList.remove('key_active');
