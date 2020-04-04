@@ -31,6 +31,7 @@ const thirdRowRu = ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 
 const fourthRowRu = ['я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '/'];
 const fourthRowEng = ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'];
 const keyCodes = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace', 'Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete', 'CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter', 'ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ControlRight'];
+const keyCodesSwitched = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backslash'];
 
 function createSimpleKey(value) {
   const key = createElem('button', 'key');
@@ -159,8 +160,8 @@ function capsOff() {
 }
 
 function capsToggle() {
-  if (!caps) capsOn();
-  if (caps) capsOff();
+  if (!caps) { capsOn(); }
+  if (caps) { capsOff(); }
   caps = !caps;
 }
 
@@ -190,16 +191,21 @@ function changeLanguage() {
 // add highlight on active keys
 
 document.addEventListener('keydown', (event) => {
+  console.log(event.repeat);
   if (event.code === 'Tab') {
     event.preventDefault();
     useTab();
   }
-  if (event.code === 'CapsLock') { capsToggle(); }
-  if (event.key === 'Shift') { capsOn(); }
+  if (event.code === 'CapsLock') {
+    capsToggle();
+    document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_active');
+  }
+  if (event.key === 'Shift') { capsToggle(); }
   keys.forEach((key) => {
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
     }
+    if (key.dataset.value === 'CapsLock') return;
     if (key.dataset.value === event.code) {
       key.classList.add('key_active');
       if (key.innerHTML.length < 2) {
@@ -216,8 +222,14 @@ document.addEventListener('keydown', (event) => {
 // remove highlight after key up
 
 document.addEventListener('keyup', (event) => {
-  if (event.key === 'Shift') { capsOff(); }
+  if (event.key === 'Shift') {
+    capsToggle();
+    document.querySelector('.key[data-value=ShiftLeft]').classList.remove('key_active');
+    document.querySelector('.key[data-value=ShiftRight]').classList.remove('key_active');
+  }
   keys.forEach((key) => {
+    if (key.dataset.value === 'CapsLock') return;
+    if (key.dataset.value === 'ShiftLeft' || key.dataset.value === 'ShiftRight') return;
     key.classList.remove('key_active');
   });
 });
@@ -229,8 +241,7 @@ keyboard.addEventListener('click', (event) => {
   if (!target) return;
   if (target.innerHTML === 'CapsLock') {
     capsToggle();
-    if (caps) { target.classList.add('key_active'); }
-    if (!caps) { target.classList.remove('key_active'); }
+    target.classList.toggle('key_active');
   }
   if (target.innerHTML === 'Tab') { useTab(); }
   if (target.innerHTML.length < 2) {
@@ -240,12 +251,14 @@ keyboard.addEventListener('click', (event) => {
 
 keyboard.addEventListener('mousedown', (event) => {
   keys.forEach(() => {
+    if (event.target.dataset.value === 'CapsLock') return;
     event.target.closest('.key').classList.add('key_active');
   });
 });
 
 keyboard.addEventListener('mouseup', (event) => {
   keys.forEach(() => {
+    if (event.target.dataset.value === 'CapsLock') return;
     event.target.closest('.key').classList.remove('key_active');
   });
 });
