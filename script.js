@@ -256,10 +256,6 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     useTab();
   }
-  if (event.key === 'Shift') {
-    capsToggle();
-    if (event.repeat) { return; }
-  }
   if (arrows.includes(event.code)) { changeCursorPos(event.code); }
   keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
@@ -287,11 +283,18 @@ document.addEventListener('keydown', (event) => {
         }
       }
       if (ctrlLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
-        changeLanguage();
+        setTimeout(changeLanguage, 300);
       }
     }
   });
 });
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Shift') {
+    if (event.repeat) { return; }
+    capsToggle();
+  }
+}, false);
 
 // remove highlight after key up
 
