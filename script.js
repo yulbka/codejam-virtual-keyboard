@@ -171,7 +171,6 @@ function capsToggle() {
   if (!caps) { capsOn(); }
   if (caps) { capsOff(); }
   caps = !caps;
-  sessionStorage.setItem('capsLk', caps);
 }
 
 function printText(text) {
@@ -257,11 +256,10 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     useTab();
   }
-  if (event.code === 'CapsLock') {
+  if (event.key === 'Shift') {
     capsToggle();
-    document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_caps_active');
+    if (event.repeat) { return; }
   }
-  if (event.key === 'Shift') { capsToggle(); }
   if (arrows.includes(event.code)) { changeCursorPos(event.code); }
   keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
@@ -298,6 +296,10 @@ document.addEventListener('keydown', (event) => {
 // remove highlight after key up
 
 document.addEventListener('keyup', (event) => {
+  if (event.code === 'CapsLock') {
+    capsToggle();
+    document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_caps_active');
+  }
   if (event.key === 'Shift') {
     capsToggle();
     document.querySelector('.key[data-value=ShiftLeft]').classList.remove('key_active');
