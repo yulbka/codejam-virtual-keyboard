@@ -31,6 +31,7 @@ const thirdRowRu = ['ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 
 const fourthRowRu = ['я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '/'];
 const fourthRowEng = ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'];
 const keyCodes = ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace', 'Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete', 'CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter', 'ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight', 'ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ControlRight'];
+const arrows = ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'];
 
 function createSimpleKey(value) {
   const key = createElem('button', 'key');
@@ -174,6 +175,35 @@ function printText(text) {
 
 function useTab() { printText('\t'); }
 
+
+function changeCursorPos(arrow) {
+  switch (arrow) {
+    case 'ArrowUp':
+      textarea.selectionStart = 0;
+      textarea.selectionEnd = textarea.selectionStart;
+      break;
+    case 'ArrowDown':
+      textarea.selectionStart = textarea.value.length;
+      textarea.selectionEnd = textarea.selectionStart;
+      break;
+    case 'ArrowLeft':
+      textarea.selectionStart -= 1;
+      if (textarea.selectionStart < 0) { textarea.selectionStart = 0; }
+      textarea.selectionEnd = textarea.selectionStart;
+      break;
+    case 'ArrowRight':
+      textarea.selectionStart += 1;
+      if (textarea.selectionStart > textarea.value.length) {
+        textarea.selectionStart = textarea.value.length;
+      }
+      textarea.selectionEnd = textarea.selectionStart;
+      break;
+    default:
+      break;
+  }
+  textarea.focus();
+}
+
 function deleteText(n) {
   const str = textarea.value;
   let startPos = textarea.selectionStart;
@@ -226,6 +256,7 @@ document.addEventListener('keydown', (event) => {
     document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_active');
   }
   if (event.key === 'Shift') { capsToggle(); }
+  if (arrows.includes(event.code)) { changeCursorPos(event.code); }
   keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
     // add highlight on active meta key
@@ -239,6 +270,7 @@ document.addEventListener('keydown', (event) => {
       // make focus on textarea and print symbols when key down
       if (key.innerHTML.length < 2) {
         event.preventDefault();
+        if (arrows.includes(key.dataset.value)) return;
         // print second value on switched keys when Shift on
         if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
           if (key.dataset.content) {
@@ -290,7 +322,9 @@ keyboard.addEventListener('click', (event) => {
   if (target.dataset.value === 'Tab') { useTab(); }
   if (target.dataset.value === 'Delete') { deleteText(1); }
   if (target.dataset.value === 'Backspace') { deleteText(-1); }
+  if (arrows.includes(target.dataset.value)) { changeCursorPos(target.dataset.value); }
   if (target.innerHTML.length < 2) {
+    if (arrows.includes(target.dataset.value)) return;
     if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
       // print second value on switched keys when Shift on
       if (target.dataset.content) {
@@ -305,6 +339,8 @@ keyboard.addEventListener('click', (event) => {
   }
 });
 
+// add highlight on mouse down
+
 keyboard.addEventListener('mousedown', (event) => {
   if (event.target.innerHTML === 'Shift') { capsToggle(); }
   keys.forEach(() => {
@@ -312,6 +348,8 @@ keyboard.addEventListener('mousedown', (event) => {
     event.target.closest('.key').classList.add('key_active');
   });
 });
+
+// remove highlight after mouse up
 
 keyboard.addEventListener('mouseup', () => {
   keys.forEach((key) => {
