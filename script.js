@@ -8,6 +8,10 @@ function createElem(element, ...classes) {
 const container = createElem('div', 'container');
 document.body.append(container);
 
+const header = createElem('h1', 'header');
+header.innerHTML = 'virtual keyboard';
+container.append(header);
+
 const textarea = createElem('textarea', 'textarea');
 container.append(textarea);
 
@@ -15,7 +19,7 @@ const keyboard = createElem('div', 'keyboard');
 container.append(keyboard);
 
 const note = createElem('p', 'note');
-note.innerHTML = 'To change language press left Ctrl + Alt\nCreated on Windows OS';
+note.innerHTML = 'To change language press left Ctrl + left Alt\nCreated on Windows OS';
 container.append(note);
 
 // create html for buttons
@@ -76,7 +80,9 @@ function createSecondRow(lang) {
 }
 
 function createThirdRow(lang) {
-  createLongKey('CapsLock');
+  const capsKey = createElem('button', 'key', 'key_wide', 'key_caps');
+  capsKey.innerHTML = 'CapsLock';
+  keyboard.append(capsKey);
   for (let i = 0; i < thirdRowEng.length; i += 1) {
     if (lang === 'eng') {
       createSimpleKey(thirdRowEng[i]);
@@ -253,19 +259,18 @@ document.addEventListener('keydown', (event) => {
   }
   if (event.code === 'CapsLock') {
     capsToggle();
-    document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_active');
+    document.querySelector('.key[data-value=CapsLock]').classList.toggle('key_caps_active');
   }
   if (event.key === 'Shift') { capsToggle(); }
   if (arrows.includes(event.code)) { changeCursorPos(event.code); }
   keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
-    // add highlight on active meta key
+    // add css class on active meta key
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
     }
-    if (key.dataset.value === 'CapsLock') return;
     if (key.dataset.value === event.code) {
-      // add highlight on active keys
+      // add css class on active meta key
       key.classList.add('key_active');
       // make focus on textarea and print symbols when key down
       if (key.innerHTML.length < 2) {
@@ -290,7 +295,7 @@ document.addEventListener('keydown', (event) => {
   });
 });
 
-// remove highlight after key up
+// remove css class after key up
 
 document.addEventListener('keyup', (event) => {
   if (event.key === 'Shift') {
@@ -299,7 +304,6 @@ document.addEventListener('keyup', (event) => {
     document.querySelector('.key[data-value=ShiftRight]').classList.remove('key_active');
   }
   keys.forEach((key) => {
-    if (key.dataset.value === 'CapsLock') return;
     if (key.dataset.value === 'ShiftLeft' || key.dataset.value === 'ShiftRight') return;
     key.classList.remove('key_active');
   });
@@ -312,7 +316,7 @@ keyboard.addEventListener('click', (event) => {
   if (!target) return;
   if (target.innerHTML === 'CapsLock') {
     capsToggle();
-    target.classList.toggle('key_active');
+    target.classList.toggle('key_caps_active');
   }
   if (target.innerHTML === 'Shift') {
     capsToggle();
@@ -339,21 +343,19 @@ keyboard.addEventListener('click', (event) => {
   }
 });
 
-// add highlight on mouse down
+// add css class on mouse down
 
 keyboard.addEventListener('mousedown', (event) => {
   if (event.target.innerHTML === 'Shift') { capsToggle(); }
   keys.forEach(() => {
-    if (event.target.dataset.value === 'CapsLock') return;
     event.target.closest('.key').classList.add('key_active');
   });
 });
 
-// remove highlight after mouse up
+// remove css class after mouse up
 
 keyboard.addEventListener('mouseup', () => {
   keys.forEach((key) => {
-    if (key.innerHTML === 'CapsLock') return;
     if (key.innerHTML === 'Shift') return;
     key.classList.remove('key_active');
   });
