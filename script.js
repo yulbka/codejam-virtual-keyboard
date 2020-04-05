@@ -167,9 +167,12 @@ function capsToggle() {
   sessionStorage.setItem('capsLk', caps);
 }
 
-function useTab() {
-  textarea.setRangeText('\t', textarea.selectionStart, textarea.selectionEnd, 'end');
+function printText(text) {
+  textarea.focus();
+  textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
 }
+
+function useTab() { printText('\t'); }
 
 function changeLanguage() {
   if (lang === 'eng') {
@@ -215,20 +218,17 @@ document.addEventListener('keydown', (event) => {
       key.classList.add('key_active');
       // make focus on textarea and print symbols when key down
       if (key.innerHTML.length < 2) {
-        textarea.focus();
-        // print second value on switched keys when Shift active
+        event.preventDefault();
+        // print second value on switched keys when Shift on
         if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
           if (key.dataset.content) {
-            event.preventDefault();
-            textarea.setRangeText(key.dataset.content, textarea.selectionStart, textarea.selectionEnd, 'end');
+            printText(key.dataset.content);
           } else {
-            event.preventDefault();
-            textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+            printText(key.innerHTML);
           }
         // print main value that displayed on simple and switched keys
         } else {
-          event.preventDefault();
-          textarea.setRangeText(key.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+          printText(key.innerHTML);
         }
       }
       if (ctrlLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
@@ -262,23 +262,39 @@ keyboard.addEventListener('click', (event) => {
     capsToggle();
     target.classList.toggle('key_active');
   }
-  if (target.innerHTML === 'Tab') { useTab(); }
+  if (target.innerHTML === 'Shift') {
+    capsToggle();
+    target.classList.remove('key_active');
+  }
+  if (target.dataset.value === 'Enter') { printText('\n'); }
+  if (target.dataset.value === 'Tab') { useTab(); }
   if (target.innerHTML.length < 2) {
-    event.preventDefault();
-    textarea.setRangeText(target.innerHTML, textarea.selectionStart, textarea.selectionEnd, 'end');
+    if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
+      // print second value on switched keys when Shift on
+      if (target.dataset.content) {
+        printText(target.dataset.content);
+      } else {
+        printText(target.innerHTML);
+      }
+      // print main value that displayed on simple and switched keys
+    } else {
+      printText(target.innerHTML);
+    }
   }
 });
 
 keyboard.addEventListener('mousedown', (event) => {
+  if (event.target.innerHTML === 'Shift') { capsToggle(); }
   keys.forEach(() => {
     if (event.target.dataset.value === 'CapsLock') return;
     event.target.closest('.key').classList.add('key_active');
   });
 });
 
-keyboard.addEventListener('mouseup', (event) => {
-  keys.forEach(() => {
-    if (event.target.dataset.value === 'CapsLock') return;
-    event.target.closest('.key').classList.remove('key_active');
+keyboard.addEventListener('mouseup', () => {
+  keys.forEach((key) => {
+    if (key.innerHTML === 'CapsLock') return;
+    if (key.innerHTML === 'Shift') return;
+    key.classList.remove('key_active');
   });
 });
