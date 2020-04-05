@@ -174,6 +174,26 @@ function printText(text) {
 
 function useTab() { printText('\t'); }
 
+function deleteText(n) {
+  const str = textarea.value;
+  let startPos = textarea.selectionStart;
+  let endPos = textarea.selectionEnd;
+  if (startPos === endPos) {
+    if (n < 0) {
+      startPos += n;
+      if (startPos < 0) { startPos = 0; }
+    }
+    if (n > 0) {
+      endPos += n;
+      if (endPos > str.length) { endPos = str.length; }
+    }
+  }
+  textarea.focus();
+  textarea.value = str.slice(0, startPos) + str.slice(endPos, str.length);
+  textarea.selectionStart = startPos;
+  textarea.selectionEnd = startPos;
+}
+
 function changeLanguage() {
   if (lang === 'eng') {
     lang = 'ru';
@@ -268,6 +288,8 @@ keyboard.addEventListener('click', (event) => {
   }
   if (target.dataset.value === 'Enter') { printText('\n'); }
   if (target.dataset.value === 'Tab') { useTab(); }
+  if (target.dataset.value === 'Delete') { deleteText(1); }
+  if (target.dataset.value === 'Backspace') { deleteText(-1); }
   if (target.innerHTML.length < 2) {
     if (shiftLeft.classList.contains('key_active') || shiftRight.classList.contains('key_active')) {
       // print second value on switched keys when Shift on
