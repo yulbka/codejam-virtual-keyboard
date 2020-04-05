@@ -265,14 +265,14 @@ document.addEventListener('keydown', (event) => {
   if (arrows.includes(event.code)) { changeCursorPos(event.code); }
   keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
-    // add css class on active meta key
+    // add highlight on active meta key
     if (event.metaKey) {
       document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
     }
     if (key.dataset.value === event.code) {
-      // add css class on active meta key
+      // add highlight on active meta key
       key.classList.add('key_active');
-      // make focus on textarea and print symbols when key down
+      // print symbols when key down
       if (key.innerHTML.length < 2) {
         event.preventDefault();
         if (arrows.includes(key.dataset.value)) return;
@@ -295,7 +295,7 @@ document.addEventListener('keydown', (event) => {
   });
 });
 
-// remove css class after key up
+// remove highlight after key up
 
 document.addEventListener('keyup', (event) => {
   if (event.key === 'Shift') {
@@ -343,7 +343,7 @@ keyboard.addEventListener('click', (event) => {
   }
 });
 
-// add css class on mouse down
+// add highlight on mouse down
 
 keyboard.addEventListener('mousedown', (event) => {
   if (event.target.innerHTML === 'Shift') { capsToggle(); }
@@ -352,7 +352,7 @@ keyboard.addEventListener('mousedown', (event) => {
   });
 });
 
-// remove css class after mouse up
+// remove highlight after mouse up
 
 keyboard.addEventListener('mouseup', () => {
   keys.forEach((key) => {
