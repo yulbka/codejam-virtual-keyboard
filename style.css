@@ -64,7 +64,7 @@ body {
    0 3px 15px rgba(0,0,0,.4),
    inset 0 1px rgba(255,255,255,.3),
    inset 0 0 3px rgba(255,255,255,.5);  
-  transition: 0.3s;
+  transition: 0.1s;
 }
 
 .key_switched::before {
@@ -90,6 +90,10 @@ body {
 
 .key_wide {
   width: 160px;
+}
+
+.key_medium {
+  width: 85px;
 }
 
 .key_space {
