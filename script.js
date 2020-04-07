@@ -195,14 +195,39 @@ function deleteText(n) {
   textarea.selectionEnd = startPosition;
 }
 
+// change letter case opposite to CapsLock while Shift pressed
+
+function useShift(event) {
+  if (event.repeat) { return; }
+  capsOn = !capsOn;
+  capsToggle();
+}
+
+function removeShift() {
+  capsOn = !capsOn;
+  capsToggle();
+  document.querySelector(`.key[data-value=${buttons.SHIFTLEFT}]`).classList.remove('key_active');
+  document.querySelector(`.key[data-value=${buttons.SHIFTRIGHT}]`).classList.remove('key_active');
+}
+
+function useCapsLock() {
+  capsOn = !capsOn;
+  sessionStorage.setItem('capsOn', capsOn);
+  capsToggle();
+  document.querySelector(`.key[data-value=${buttons.CAPSLOCK}]`).classList.toggle('key_caps_active');
+}
+
 // key events
-// add highlight and print symbols on key press
+// add highlight, print symbols, use special keys on key press
 
 document.addEventListener('keydown', (event) => {
   event.preventDefault();
-  if (event.metaKey) {
-    document.querySelector('.key[data-value=MetaLeft]').classList.add('key_active');
-  }
+  if (event.code === buttons.TAB) { printText('\t'); }
+  if (event.code === buttons.ENTER) { printText('\n'); }
+  if (event.code === buttons.DELETE) { deleteText(1); }
+  if (event.code === buttons.BACKSPACE) { deleteText(-1); }
+  if (event.key === buttons.SHIFT) useShift(event);
+  if (arrows.includes(event.code)) { changeCursorPosition(event.code); }
   const keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
     if (key.dataset.value === event.code) {
@@ -210,66 +235,19 @@ document.addEventListener('keydown', (event) => {
       printKeySymbol(key);
     }
   });
-});
+}, false);
 
-// process special keys (Tab, arrows, change language)
 
-document.addEventListener('keydown', (event) => {
-  if (event.code === buttons.TAB) {
-    event.preventDefault();
-    printText('\t');
-  }
-  if (event.code === buttons.ENTER) { printText('\n'); }
-  if (event.code === buttons.DELETE) { deleteText(1); }
-  if (event.code === buttons.BACKSPACE) { deleteText(-1); }
-  if (arrows.includes(event.code)) { changeCursorPosition(event.code); }
-});
+// remove highlight after key up, change language on left alt + left ctrl
 
-// change language on left alt + left ctrl
-
-document.addEventListener('keyup', () => {
+document.addEventListener('keyup', (event) => {
   const ctrlLeft = document.querySelector(`.key[data-value=${buttons.CONTROLLEFT}]`);
   const altLeft = document.querySelector(`.key[data-value=${buttons.ALTLEFT}]`);
   if (ctrlLeft.classList.contains('key_active') && altLeft.classList.contains('key_active')) {
     changeLanguage();
   }
-});
-
-// change letter case on CapsLock
-
-document.addEventListener('keyup', (event) => {
-  if (event.code === buttons.CAPSLOCK) {
-    capsOn = !capsOn;
-    sessionStorage.setItem('capsOn', capsOn);
-    capsToggle();
-    document.querySelector(`.key[data-value=${buttons.CAPSLOCK}]`).classList.toggle('key_caps_active');
-  }
-});
-
-// change letter case opposite to CapsLock while Shift pressed
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === buttons.SHIFT) {
-    if (event.repeat) { return; }
-    capsOn = !capsOn;
-    capsToggle();
-  }
-}, false);
-
-// remove Shift impact after Shift up
-
-document.addEventListener('keyup', (event) => {
-  if (event.key === buttons.SHIFT) {
-    capsOn = !capsOn;
-    capsToggle();
-    document.querySelector(`.key[data-value=${buttons.SHIFTLEFT}]`).classList.remove('key_active');
-    document.querySelector(`.key[data-value=${buttons.SHIFTRIGHT}]`).classList.remove('key_active');
-  }
-});
-
-// remove highlight after key up
-
-document.addEventListener('keyup', () => {
+  if (event.code === buttons.CAPSLOCK) { useCapsLock(); }
+  if (event.key === buttons.SHIFT) { removeShift(); }
   const keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
     if (key.dataset.value === buttons.SHIFTLEFT || key.dataset.value === buttons.SHIFTRIGHT) return;
@@ -278,12 +256,12 @@ document.addEventListener('keyup', () => {
 });
 
 // use keyboard on mouse-click
+// add highlight on mouse down
 
 const keyboard = document.body.querySelector('.keyboard');
 
-// add highlight on mouse down
-
 keyboard.addEventListener('mousedown', (event) => {
+  if (event.target.innerHTML === buttons.SHIFT) { useShift(event); }
   const keys = document.querySelectorAll('.key');
   keys.forEach(() => {
     event.target.closest('.key').classList.add('key_active');
@@ -292,7 +270,12 @@ keyboard.addEventListener('mousedown', (event) => {
 
 // remove highlight after mouse up
 
-keyboard.addEventListener('mouseup', () => {
+keyboard.addEventListener('mouseup', (event) => {
+  if (event.target.dataset.value === buttons.CAPSLOCK) { useCapsLock(); }
+  if (event.target.innerHTML === buttons.SHIFT) {
+    removeShift();
+    event.target.classList.remove('key_active');
+  }
   const keys = document.querySelectorAll('.key');
   keys.forEach((key) => {
     if (key.innerHTML === buttons.SHIFT) return;
@@ -300,51 +283,15 @@ keyboard.addEventListener('mouseup', () => {
   });
 });
 
-// print symbols on mouse click
+// print symbols and use special keys on mouse click
 
 keyboard.addEventListener('click', (event) => {
-  const target = event.target.closest('.key');
-  if (!target) return;
+  if (!event.target.closest('.key')) return;
   printKeySymbol(event.target);
-});
-
-// use special keys on mouse click
-
-keyboard.addEventListener('click', (event) => {
   const target = event.target.dataset.value;
   if (target === buttons.ENTER) { printText('\n'); }
   if (target === buttons.TAB) { printText('\t'); }
   if (target === buttons.DELETE) { deleteText(1); }
   if (target === buttons.BACKSPACE) { deleteText(-1); }
   if (arrows.includes(target)) { changeCursorPosition(target); }
-});
-
-// toggle CapsLock on mouse click
-
-keyboard.addEventListener('mouseup', (event) => {
-  if (event.target.dataset.value === buttons.CAPSLOCK) {
-    capsOn = !capsOn;
-    sessionStorage.setItem('capsOn', capsOn);
-    capsToggle();
-    document.querySelector(`.key[data-value=${buttons.CAPSLOCK}]`).classList.toggle('key_caps_active');
-  }
-});
-
-// change letter case opposite to CapsLock while Shift onclick
-
-keyboard.addEventListener('mousedown', (event) => {
-  if (event.target.innerHTML === buttons.SHIFT) {
-    capsOn = !capsOn;
-    capsToggle();
-  }
-});
-
-// remove Shift impact after Shift mouseup
-
-keyboard.addEventListener('mouseup', (event) => {
-  if (event.target.innerHTML === buttons.SHIFT) {
-    capsOn = !capsOn;
-    capsToggle();
-    event.target.classList.remove('key_active');
-  }
 });
